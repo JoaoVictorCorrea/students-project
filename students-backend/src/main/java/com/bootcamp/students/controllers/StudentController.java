@@ -28,9 +28,9 @@ public class StudentController {
     @PostConstruct
     public void init() {
         
-        Student student1 = new Student(1, "Student1", "student1@gmail.com", "111111111", 1, 1);
-        Student student2 = new Student(2, "Student2", "student2@gmail.com", "222222222", 2, 2);
-        Student student3 = new Student(3, "Student3", "student3@gmail.com", "333333333", 3, 3);
+        Student student1 = new Student(1, "Student1", "student1@gmail.com", "(11) 1111-11111", 1, 1);
+        Student student2 = new Student(2, "Student2", "student2@gmail.com", "(22) 2222-22222", 2, 2);
+        Student student3 = new Student(3, "Student3", "student3@gmail.com", "(33) 3333-33333", 3, 3);
 
         students.add(student1);
         students.add(student2);
