@@ -1,32 +1,40 @@
 $("#inputPhone").mask("(99) 9999-99999");
 
-var students = [
-    {
-        id: 1,
-        name: "Pedro Antonio",
-        email: "pedro.antonio@abutua.com",
-        phone: "(15) 9999-9999",
-        course: "Angular",
-        shift: "Tarde"
-    },
-    {
-        id: 2,
-        name: "Matheus Calvo",
-        email: "matheus.calvo@gmail.com",
-        phone: "(11) 9999-9999",
-        course: "Java",
-        shift: "Noite"
-    }
-];
+//Data
+var students = [];
+var courses = [];
 
 //OnLoad
+loadCourses();
 loadStudents();
+
+//Load all courses
+function loadCourses() {
+    $.ajax({
+        url: "http://localhost:8080/courses",
+        type: "GET",
+        async: false,
+        success: (response) => {
+            courses = response;
+
+            for (let course of courses) {
+                addNewCourse(course);
+            }
+        }
+    });
+}
 
 //Load all students
 function loadStudents() {
-    for (let student of students) {
-        addNewRow(student);
-    }
+
+    $.getJSON("http://localhost:8080/students", (response) => {
+
+        students = response;
+
+        for (let student of students) {
+            addNewRow(student);
+        }
+    });
 }
 
 //Add new Row
@@ -56,27 +64,28 @@ function addNewRow(student) {
     cell.appendChild(phoneNode);
 
     //Insert course student
-    var courseNode = document.createTextNode(student.course);
+    var courseNode = document.createTextNode(courses[student.idCourse - 1].name);
     var cell = newRow.insertCell();
     cell.className = "d-none d-sm-table-cell";
     cell.appendChild(courseNode);
 
-    //Insert shift student
-    var shiftNode = document.createTextNode(student.shift);
+    //Insert period student
+    var periods = document.getElementsByName("radioPeriod");
+    var periodNode = document.createTextNode(periods[student.period - 1].value);
     var cell = newRow.insertCell();
     cell.className = "d-none d-md-table-cell";
-    cell.appendChild(shiftNode);
+    cell.appendChild(periodNode);
 }
 
 //Save a student
 function saveStudent() {
 
-    var shifts = document.getElementsByName("radioShift");
-    var shiftSelected = "";
+    var periods = document.getElementsByName("radioPeriod");
+    var periodSelected = 0;
 
-    for (var i = 0; i < shifts.length; i++) {
-        if (shifts[i].checked) {
-            shiftSelected = shifts[i].value;
+    for (var i = 0; i < periods.length; i++) {
+        if (periods[i].checked) {
+            periodSelected = i;
             break;
         }
     }
@@ -86,13 +95,25 @@ function saveStudent() {
         name: document.getElementById("inputName").value,
         email: document.getElementById("inputEmail").value,
         phone: document.getElementById("inputPhone").value,
-        course: document.getElementById("selectCourse").value,
-        shift: shiftSelected,
+        idCourse: document.getElementById("selectCourse").selectedIndex + 1,
+        period: periodSelected + 1,
     };
 
-    addNewRow(student);
+    $.ajax({
+        url: "http://localhost:8080/students",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(student),
+        success: (student) => {
+            addNewRow(student);
+            students.push(student);
+            document.getElementById("formStudent").reset();
+        }
+    });
+}
 
-    students.push(student);
-
-    document.getElementById("formStudent").reset();
+function addNewCourse(course) {
+    var option = new Option(course.name, course.id);
+    var select = document.getElementById("selectCourse");
+    select.add(option);
 }
